@@ -1,0 +1,173 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #2.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name:Zain ElHashemite
+
+CWID:20010286
+
+Date:2/4/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+
+```
+
+# Question 1
+
+For this question, you will need to choose two assets and download the daily adjusted close for the last (calendar) year.  Save this data as a csv and then read it in as a data frame.  You will use this data to do the following:
+```{r}
+#install.packages("ggplot2")
+
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+
+```
+
+## a) 
+
+For each of your assets, find the sample mean and sample standard deviation of your data.
+
+```{r}
+mean(AAPL$AAPL.Adjusted)
+mean(ADP$ADP.Adjusted)
+sd(AAPL$AAPL.Adjusted)
+sd(ADP$ADP.Adjusted)
+```
+
+## b)
+
+Create a histogram for each asset, showing each in its own plot. 
+
+```{r}
+hist(AAPL$AAPL.Adjusted, main = "AAPL Adjusted CLose")
+
+hist(ADP$ADP.Adjusted, main = "ADP Adjusted Close")
+```
+
+## c)
+
+Create a box-plot for each asset
+
+```{r}
+boxplot(AAPL$AAPL.Adjusted, main = "AAPL Adjusted Close", ylab = "Close Price")
+boxplot(ADP$ADP.Adjusted, main = "ADP Adjusted Close", ylab = "Close Price")
+```
+
+## d)
+
+Determine the sample covariance and sample correlation coeffecient for these two assets.
+
+```{r}
+cov(AAPL$AAPL.Adjusted,ADP$ADP.Adjusted)
+
+cor(AAPL$AAPL.Adjusted,ADP$ADP.Adjusted)
+
+
+```
+
+
+
+# Question 2 (Adapted from Stinerock: Statistics with R)
+
+Using the Cars93 data (which can be found in the MASS package)
+## a)
+Print out the variable names
+
+```{r}
+library(MASS)
+names(Cars93)
+```
+## b)
+For the Type variable, print out the frequency and relative frequency tables.  Using these tables, what percentage of the data set are large cars?
+
+```{r}
+freq = summary(Cars93$Type)
+total = length(Cars93$Type)
+relfreq = freq/total
+
+freq
+relfreq
+
+#11.82% of the cars in the dataset are large cars
+
+```
+## c)
+Create a cross-tabulation table of the variables Origin and Type.  Using this table, can you conclude that most of the vehicles are of US origin?
+
+```{r}
+library(gmodels)
+CrossTable(Cars93$Origin,Cars93$Type)
+#Yes, 48 of the cars are from the US while 45 are not from the US
+
+
+```
+
+# Question 3 (Adapted from Stinerock: Statistics with R)
+
+Using the LakeHuron data set (already in R), find the range, interquartile range, variance, standard deviation, and coeffecient of variation.
+
+
+```{r}
+data("LakeHuron")
+LakeHuron.range = max(LakeHuron) - min(LakeHuron) #range
+LakeHuron.range
+
+LakeHuron.iqr = IQR(LakeHuron) #interquartile Range
+LakeHuron.iqr
+
+LakeHuron.var = var(LakeHuron) #variance
+LakeHuron.var
+
+LakeHuron.sd = sd(LakeHuron) #standard deviation
+LakeHuron.sd
+
+LakeHuron.cv = sd(LakeHuron)/mean(LakeHuron) #coefficient of variation
+LakeHuron.cv
+
+
+```
+
+
+
+
+
+
+

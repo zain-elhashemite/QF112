@@ -1,0 +1,194 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #9.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name:Zain ElHashemite
+
+CWID: 20010286
+
+Date:4/16/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+# Question 1 
+
+Install the ISLR package and load it into your R-session.  We'll be using the "Smarket" data set from this package for this problem.
+```{r}
+library(ISLR)
+data("Smarket")
+```
+For this problem, we're going to look at the relationship between "Today" and the "lagx" variables.  
+
+## a)
+
+Run a subset selection to determine which of the lag variables will give you the best model for predicting the value of "Today".  
+```{r}
+library(leaps)
+data1 = Smarket[c(8,2:6)]
+attach(data1)
+select = regsubsets(Today~., data=data1)
+summary(select)
+
+
+
+```
+
+## b)
+
+Plot the adjust R-squared for the number of predictors and use this to determine which is the best model.  Which model did it choose?
+
+```{r}
+
+adjr2=summary(select)$adjr2
+k=which.max(adjr2)
+k
+adjr2[k]
+
+plot(adjr2,type='b',col="blue",xlab="Number of Predictors",ylab=expression("Adjusted R-squared"))
+points(k,adjr2[k],pch=19,col="red")
+
+coef(select,k)
+
+#it chose Lag 5
+
+
+
+```
+
+# Question 2
+
+Using your data set of the two assets that we've been using this semester, perform the following operations.  Choose one of your variables to be the independent and one to be the dependent variables.  Randomly split your data into two approximately equal pieces, which we'll label the training data and the testing data.
+```{r}
+
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+
+
+AAPL_df = read.csv("AAPL.csv", header = TRUE, sep = ",")
+ADP_df = read.csv("ADP.csv", header = TRUE, sep = ",")
+
+df = data.frame(AAPL = AAPL_df$AAPL.Adjusted, ADP = ADP_df$ADP.Adjusted)
+
+n = dim(df)[1]
+
+train_split = sample(n,n/2)
+
+train_df = df[train_split,]
+test_df = df[-train_split,]
+```
+## a)
+
+Using the training data, fit a linear regression model between these two variables.  Using this model, calculate the mean squared error using the test data.
+
+```{r}
+#create linear regression with training data
+model = lm(ADP~AAPL, data = df, subset = train_split)
+
+predicted = predict(model, newdata = test_df)
+mse = mean((predicted - df$ADP[-train_split])^2)
+mse
+
+```
+
+
+## b)
+
+Next, fit a linear regression model using up to order 8 of the independent variables (up to price^8, you can do this with the poly() command in R).  Again, calculate the mean squared error using the test data.
+
+```{r}
+x = df$AAPL
+y = df$ADP
+
+df2 = data.frame(y, poly(x,8))
+df2_train = df2[train_split,]
+df2_test = df2[-train_split,]
+
+model2 = lm(y~., data = df2, subset = train_split)
+pred2 = predict(model2, df2_test)
+mse2 = mean((pred2 - df2$y[-train_split])^2)
+mse2
+
+```
+
+## c)
+
+Apply subset selection (your choice of best, forward, or backward) for the linear regression model from part b) with the criteria of the adjusted R-squared.  Which subset of these powers gives you the best fit?  Using the optimal model, calculate the mean squared error of your test data.
+
+
+
+```{r}
+
+p = dim(df2)[2]-1
+sub = regsubsets(y~., data = df2, nvmax = p, method = 'forward')
+
+adjr2 = summary(sub)$adj
+k = which.max(adjr2)
+k
+
+coef(sub, k)[-1]
+
+#the best fit uses 4 predictors, X3, X4, X5, and X7
+
+fil = c("y", names(coef(sub, k)[-1]))
+
+df_filtered = df2[,fil]
+
+sub_model = lm(y~., data = df_filtered, subset = train_split)
+
+train_fil = df_filtered[train_split,]
+test_fil = df_filtered[-train_split,]
+
+sub_pred = predict(sub_model, test_fil)
+sub_mse = mean((sub_pred - df_filtered$y[-train_split])^2)
+sub_mse
+
+```
+
+
+## d)
+
+Compare the MSE's from each part.  What conclusions can you form based on these values?
+
+The MSEs from all three parts were all very similar in that they were all within 15 of each other. The linear regression model I first fit using AAPL as the independent variable and ADP as the dependent variable yielded an MSE of 341.0552, while the linear regression I fit with up to order 8 of AAPL gave me a slightly greater MSE of 355.3866. Between these two MSEs sits the one calculated using forward subset selection with the adjusted R-squared value, which was 345.396. Since part A had the lowest MSE, we can conclude that part A fit the data better than any other part.
+
+

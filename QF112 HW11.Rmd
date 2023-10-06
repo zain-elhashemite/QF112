@@ -1,0 +1,386 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #11.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 4-29-2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+#get stock data for AAPL
+library(quantmod)
+
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+data = read.csv("AAPL.csv")[7]
+AAPL_data = unlist(data)
+
+mean_year = mean(AAPL_data)
+sd_year = sd(AAPL_data)
+
+mean_year
+sd_year
+
+#mean = 154.1466
+#sd = 12.82598
+
+```
+
+# Question 1
+
+Take a sample of $n$ points from one of your stock prices.  Use these $n$ points to determine estimates for the mean and standard deviation of the entire year, by using bootstrapping $B$ new samples and determining a $90\%$ confidence interval.
+
+## a)
+
+use $n=10$ and $B=100$
+
+```{r}
+
+set.seed(286)
+
+n = 10
+B = 100
+
+bootstrap = replicate(B, sample(AAPL_data, n, replace = TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[149.5261, 158.1602]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[9.80101, 15.55998]
+
+```
+
+## b)
+
+use $n=10$ and $B=1000$
+
+```{r}
+
+set.seed(286)
+
+n = 10
+B = 1000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[149.2264, 159.0742]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[9.484559, 15.632582]
+
+
+
+```
+
+## c)
+
+use $n=10$ and $B=1000000$
+
+```{r}
+
+set.seed(286)
+
+n = 10
+B = 1000000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[148.9276, 159.3674]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[9.65837, 15.47284]
+
+
+
+```
+
+## d)
+
+use $n=5$ and $B=1000$
+```{r}
+
+set.seed(286)
+
+n = 5
+B = 1000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[147.0126, 161.3262]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[7.026572, 16.989396]
+
+
+
+```
+
+## e)
+
+use $n=5$ and $B=1000000$
+
+```{r}
+
+set.seed(286)
+
+n = 5
+B = 1000000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[146.7287, 161.5781]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[7.432474, 16.888429]
+
+
+```
+
+## f)
+
+use $n=50$ and $B=1000$
+
+```{r}
+
+set.seed(286)
+
+n = 50
+B = 1000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[151.8355, 156.4322]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[11.61028, 13.91887]
+
+
+```
+
+## g)
+
+use $n=50$ and $B=1000000$
+
+```{r}
+
+set.seed(286)
+
+n = 50
+B = 1000000
+
+bootstrap = replicate(B,sample(AAPL_data,n,TRUE))
+
+mean = apply(bootstrap, MARGIN = 2, FUN = mean)
+sd = apply(bootstrap, MARGIN = 2, FUN = sd)
+
+confint_mean = sort(mean)
+confint_sd = sort(sd)
+
+mean_low = confint_mean[as.integer(.10*B)]
+mean_high = confint_mean[as.integer(.9*B)]
+
+ConfMEAN = c(mean_low,mean_high)
+ConfMEAN
+#[151.8253, 156.4626]
+
+sd_low = confint_sd[as.integer(.10*B)]
+sd_high = confint_sd[as.integer(.90*B)]
+
+ConfSD = c(sd_low,sd_high)
+ConfSD
+#[11.58096, 13.94315]
+
+
+
+```
+
+
+## h)
+
+For how many of these do your observed values of the mean and standard deviation of the year fall within?
+
+- The mean and standard deviation of the full year fell between each respective confidence interval
+
+# Question 2
+
+You're designing a game to play in which a person flips a coin Five times.  You set up a payout structure that if the sequence of tosses includes "THT" (at any time in the five tosses, such as HHTHT or TTHTT) then the person wins 100 dollars and if you get all head or all tails then you win 1000.  Using Monte Carlo simulations with $M=10000$ (the number of simulations) answer the following
+
+## a)
+
+What should be the "fair" price of this game if you are using a fair coin
+
+```{r}
+set.seed(286)
+simulate_game = function(){
+  coin_tosses = sample(c("H", "T"), size = 5, replace = TRUE, prob = c(0.5,0.5))
+  if(any(grepl("THT", paste(coin_tosses, collapse = "")))){
+    return(100)
+  } else if(all(coin_tosses == "H") || all(coin_tosses == "T")){
+    return(1000)
+  } else {
+    return(0)
+  }
+}
+
+M = 10000
+
+
+payouts = replicate(M, simulate_game())
+
+mean(payouts)
+
+# a fair price for this game would be $98.20
+
+```
+
+## b)
+
+What should be the "fair" price of this game if you are using a coin that comes up heads 2/3 of the time?
+
+```{r}
+set.seed(286)
+simulate_game = function(){
+  #change probability of heads vs tails
+  coin_tosses = sample(c("H", "T"), size = 5, replace = TRUE, prob = c(2/3,1/3)) 
+  if(any(grepl("THT", paste(coin_tosses, collapse = "")))){
+    return(100)
+  } else if(all(coin_tosses == "H") || all(coin_tosses == "T")){
+    return(1000)
+  } else {
+    return(0)
+  }
+}
+
+M = 10000
+
+
+payouts = replicate(M, simulate_game())
+
+mean(payouts)
+
+# a fair price for this game would be $161.71
+
+```

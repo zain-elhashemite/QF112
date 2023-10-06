@@ -1,0 +1,234 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #8.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 4/8/2023
+
+
+
+
+```{r}
+CWID = -1 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+# Question 1 (Adapted from Stinerock)
+
+For this problem and all the others in this homework assignment, you are not allowed to use any of the pre-built linear regression commands such as lm() unless specifically instructed to.  Using the "mtcars" data set in R (a pre-loaded data frame)
+```{r}
+#?mtcars  #make sure you comment this out when you knit it as this makes knitting weird
+```
+For this problem, we're going to look at the relationship between "mtcars\$qsec", its quarter mile time and "mtcars\$hp", its gross horsepower.  We'll be using the gross horsepower as the independent variable.
+
+## a)
+
+Create a scatterplot of these two variables
+
+```{r}
+
+data("mtcars")
+
+x = c(mtcars$hp)
+y = c(mtcars$qsec)
+
+plot(x,y, main = "Scatterplot of HP vs Quartermile Time", xlab = "HP", ylab = "Q-Mile Time (Seconds)")
+
+```
+
+
+## b)
+
+Estimate the parameters for the regression line between these two variables
+
+```{r}
+
+x = c(mtcars$hp)
+y = c(mtcars$qsec)
+
+beta1 = cov(x, y) / var(x)
+beta0 = mean(y) - beta1 * mean(x)
+
+#beta1: -0.01845831
+#beta0: 20.55635
+
+
+```
+
+## c)
+
+For this fit, what is your R-squared value?
+
+```{r}
+yhat = beta0 + beta1 * x
+
+rss = sum((y - yhat)^2)
+
+tss = sum((y - mean(y))^2)
+
+r_squared = 1 - (rss/tss)
+
+#r_squared: 0.5015804
+
+
+```
+
+## d)
+
+Is this fit significant at the alpha=.05 level?
+
+```{r}
+#Ho: Beta1 = 0
+#Ha: Beta1 =/ 0
+
+n = length(x)
+rse = sqrt(sum((y-yhat)^2)/(n-2))
+std_err = rse/sqrt(sum((x-mean(x))^2))
+p = 2*(1-pt(abs(beta1/std_err),n-2))
+p
+
+#since the p-value is less than our alpha of 0.05, we can reject the null hypothesis concluding that x and y are linearly related
+
+```
+
+## e)
+
+What is the p-value?
+```{r}
+
+p = 2*(1-pt(abs(beta1/std_err),n-2))
+p
+
+#p-value = 5.766253e-06
+
+```
+
+
+# Question 2
+
+Using your data set of the two assets that we've been using this semester, perform the following operations.
+
+## a)
+
+Choose one of your variables to be the independent and one to be the dependent variables.  Create a second data frame that just consists of the first 6 months of data for both.  Using just this first six months, find the estimates for the linear relationship between these two assets.
+
+
+```{r}
+library(quantmod)
+getSymbols("AAPL;ADP", from="2022-01-01", to="2022-07-01")
+
+data = data.frame(as.numeric(AAPL$AAPL.Adjusted),as.numeric(ADP$ADP.Adjusted))
+
+x = as.numeric(AAPL$AAPL.Adjusted)
+y = as.numeric(ADP$ADP.Adjusted)
+meanAAPL = mean(AAPL$AAPL.Adjusted)
+meanADP = mean(ADP$ADP.Adjusted)
+
+beta1 = sum((x-meanAAPL)*(y-meanADP))/(sum((x-meanAAPL)^2))
+beta0 = meanADP - beta1 * meanAAPL
+yhat = beta0 + beta1 * x
+
+
+#parameter estimates
+#beta_1: 0.3102956
+#beta_0: 162.8703
+yhat
+
+plot(x,y, xlab = "AAPL", ylab = "ADP")
+abline(beta0, beta1, col = "red")
+
+
+```
+
+## b)
+
+Determine the R-squared value and determine the p-value for this fit.
+```{r}
+
+rss = sum((y - yhat)^2)
+tss = sum((y - mean(y))^2)
+
+r_sq = 1 - rss/tss
+#r_squared value: 0.1223301
+
+
+df = length(x) - 2
+rse = sqrt(rss/df)
+t_stat = beta1 / (rse/sqrt(sum((x-meanAAPL)^2)))
+
+pval = 2 * pt(-abs(t_stat), df)
+#pval:6.839496e-05
+
+
+
+
+```
+
+
+## c)
+
+Using the model that you determined in part a), for the latter six months of data, use the linear regression model to predict the dependent asset using the independent one.  Using these predictions (and of course the actual observed values of the dependent asset over this time period) calculate the R-squared.  How does this compare with the value you found in part b)?  If they are different, why might that be?
+
+```{r}
+library(quantmod)
+getSymbols("AAPL;ADP", from="2022-07-01", to="2023-01-01")
+data = data.frame(as.numeric(AAPL$AAPL.Adjusted),as.numeric(ADP$ADP.Adjusted))
+
+x = as.numeric(AAPL$AAPL.Adjusted)
+y = as.numeric(ADP$ADP.Adjusted)
+meanAAPL = mean(AAPL$AAPL.Adjusted)
+meanADP = mean(ADP$ADP.Adjusted)
+
+beta1 = sum((x-meanAAPL)*(y-meanADP))/(sum((x-meanAAPL)^2))
+beta0 = meanADP - beta1 * meanAAPL
+yhat = beta0 + beta1 * x
+
+plot(x,y, xlab = "AAPL", ylab = "ADP")
+abline(beta0, beta1, col = "red")
+
+
+rss = sum((y-yhat)^2)
+tss = sum((y-meanADP)^2)
+R2 = 1 - (rss/tss)
+R2
+
+df = length(x) - 2
+rse = sqrt(rss/df)
+t_stat = beta1 / (rse/sqrt(sum((x-meanAAPL)^2)))
+
+p2 = 2 * pt(-abs(t_stat), df)
+p2
+#pvalue = 0.004579247
+```
+
+

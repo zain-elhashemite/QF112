@@ -1,0 +1,347 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #7.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 3/29/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+# Question 1 (Taken from Stinerock)
+
+In a recent consumer confidence survey of 400 adults, 54 of 200 men and 36 of 200 women expressed agreement with the statement, "I would have trouble paying an unexpected bill of 1000 dollars without borrowing from someone or selling something."
+
+## a)  Do men and women differ on their answer to this question?  Answer at the .05 level of significance. 
+
+```{r}
+
+#null hyp: men and women do not differ on their answer
+#alt hyp: men and women differ on their answer
+
+
+x1 = 54
+x2 = 36
+n1 = 200
+n2 = 200
+alpha = 0.05
+pbar1 = x1/n1
+pbar2 = x2/n2
+pbar1
+pbar2
+
+
+
+#since it is two-tailed, the critical value is +-1.96
+
+p = ((n1*pbar1)+(n2*pbar2))/(n1+n2)
+p
+
+z = (pbar1-pbar2)/(sqrt(p*(1-p)*(1/n1+1/n2)))
+z
+
+#reject null hypothesis since z is greater than 1.96
+```
+
+## b)  What is the p-value?
+```{r}
+
+pval = pnorm(z, lower.tail=FALSE) + pnorm(-z)
+pval
+#p value: 0.03114121
+
+```
+# Question 2 (adapted from Walpole, Myers, Myers, and Ye)
+
+
+The running times in minutes for films produced by two companies are as follows:
+
+For company A: 103, 94, 110, 87, 98
+For company B: 97, 82, 123, 92, 175, 88, 118
+
+## a)
+
+Compute the $90\%$ confidence interval for the differences between the average running times of the films.  (Assume approximately normally distributed)
+
+```{r}
+
+n1 = 5
+n2 = 7
+alpha = 0.1
+
+x = c(103,94,110,87,98)
+y = c(97,82,123,92,175,88,118)
+
+xsd = sd(x)
+ysd = sd(y)
+
+df = n1+n2 - 2
+
+sp = sqrt(((n1-1)*xsd*xsd+(n2-1)*ysd*ysd)/df)
+
+L = (mean(x) - mean(y)) - qt(1-alpha/2,df)*sp*sqrt((1/n1)+(1/n2))
+
+H =  (mean(x) - mean(y)) + qt(1-alpha/2,df)*sp*sqrt((1/n1)+(1/n2))
+
+conf_int = c(L,H)
+conf_int
+
+#Confidence Interval: [-39.41433, 14.78576]
+
+```
+
+## b)
+
+Construct a $90\%$ confidence interval for $\sigma_A/\sigma_B$ where $\sigma_A$ and $\sigma_B$ are the respective population standard deviations of the running times of the respective companies.
+```{r}
+
+mean(x)
+xdf = 5-1
+mean(y)
+ydf=7-1
+
+compA = sqrt(((((103-98.4)^2)+((94-98.4)^2)+((110-98.4)^2)+((87-98.4)^2)+((98-98.4)^2)))/xdf)
+compA
+
+
+compB = sqrt((((97-110.7143)^2)+((82- 110.7143)^2)+((123- 110.7143)^2)+((92- 110.7143)^2)+((175- 110.7143)^2)+((88- 110.7143)^2)+((118- 110.7143)^2))/ydf)
+compB
+
+qf(.90,xdf,ydf)
+
+lower = ((compA^2)/(compB^2) * 1/3.180763)
+lower
+
+upper = ((compA^2)/(compB^2) * 3.180763)
+upper
+
+CI = c(lower,upper)
+CI
+
+#conf int is [0.02315653, 0.23428043]
+```
+# Question 3 (adapted from WMMY)
+
+Two professors give their students exams, and record the length of time it takes the students to finish.  The results are below
+
+Professor 1:  102, 86, 98, 109, 92
+Professor 2:  81, 165, 97, 134, 92, 87, 114
+
+## a)
+
+Test the statement that the students in Professor 2's class took over ten minutes longer than in Professor 1's class.  Use a .1 level of significance.
+
+```{r}
+
+#null hypothesis: Prof 2's class took less than 10 minutes longer than Prof 1's class
+#alt hypothesis: Prof 2's class took over 10 minutes longer than Prof 1's class
+
+alpha = 0.01
+mu = 10
+
+prof1 = c(102, 86, 98, 109, 92)
+mean(prof1)
+sd(prof1)
+
+prof2 = c(81, 165, 97, 134, 92, 87, 114)
+mean(prof2)
+sd(prof2)
+
+t = (mean(prof1)-mean(prof2) - 10)/(sqrt(((sd(prof1)^2)/5) + ((sd(prof2))^2)/7))
+t
+
+p = pnorm(t)
+p
+
+#p-value is 0.03081988, which is less than the 0.1 level of significance, meaning we can reject the null hypothesis
+
+```
+
+
+## b)
+
+Test at the .05 significance level whether these student times have different variances.
+
+```{r}
+
+var1 = (sd(prof1))^2
+var2 = (sd(prof2))^2
+
+fval = var1/var2
+fval
+
+#fval is 0.08627737
+
+df1 = 5-1
+df2 = 7-1
+qf(0.95,df1,df2)
+
+#f critical value is 4.533677
+
+# since the fval is less than the critical value (0.08627737<4.533677), we can say that the two variances are not different at this significance level
+
+
+```
+
+# Question 4
+
+Using your two stocks that you've been working with, answer the following.  For each question, calculate the p-value and then use it to determine at what level of significance you'd be able to reject the null hypothesis.  Is this level one that you would personally feel is meaningful?
+```{r}
+
+
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+AAPL = as.numeric(AAPL[,4])
+ADP = as.numeric(ADP[,4])
+
+```
+## a)
+
+Look at the daily difference between the two stocks for the first 15 days.  Is this significantly different from the current difference between the value of the two stocks?
+(Hint: this is paired data that you'll run against the difference of the two stocks at the time of completing this assignment)
+
+```{r}
+AAPL
+diff = AAPL[1:15] - ADP[1:15]
+
+diff_current = AAPL[251] - ADP[251]
+
+t.test(diff, mu = diff_current, alternative = 'two.sided')
+
+#the p-value here is 9.869e-16, which is extremely close to 0, this means it is reasonable to say that the difference of the first 15 days and the difference of the last day of AAPL and ADP are different. 
+
+```
+
+## b)
+
+Do the differences between the two stocks for the first 15 days differ from the differences between the stocks for the last 15 days? 
+
+```{r}
+
+AAPL_first_15 = as.numeric(AAPL[1:15])
+ADP_first_15 = as.numeric(ADP[1:15])
+
+diff1 = AAPL_first_15 - ADP_first_15
+
+AAPL_last_15 = as.numeric(tail(AAPL,15))
+ADP_last_15 = as.numeric(tail(ADP,15))
+
+diff2 = AAPL_last_15 - ADP_last_15
+
+t.test(diff1,diff2,alternative = 'two.sided', var.equal = TRUE)
+
+#p value < 2.2e-16, again very close to 0
+#this shows that the differences between the stocks for the first 15 days differ from the differences between the stocks for the last 15 days.
+
+```
+
+## c)
+
+For the entire year, do the two stocks have the same variance?
+
+```{r}
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+
+
+AAPL_var = (sd(AAPL$AAPL.Adjusted))^2
+ADP_var = (sd(ADP$ADP.Adjusted))^2
+
+AAPL_var # 164.5057
+ADP_var # 343.4122
+
+#Over the entire year these stocks do not have the same variance
+
+
+
+```
+
+## d)
+
+For each stock (so answer this question for each asset individually), are the simple returns for the first 25 days different from the simple returns from the last 25 days?
+```{r}
+
+#AAPL
+AAPL_return = dailyReturn(AAPL)
+first_25_AAPL = AAPL_return[1:25]
+last_25_AAPL = tail(AAPL_return,25)
+AAPLfirstMean = mean(first_25_AAPL)
+AAPLfirstSD = sd(first_25_AAPL)
+AAPLlastMean = mean(last_25_AAPL)
+AAPLlastSD = sd(last_25_AAPL)
+
+if(AAPLfirstMean == AAPLlastMean & AAPLfirstSD == AAPLlastSD){
+  print("true")
+}else{
+  print("false")
+}
+
+# since the means and standard deviations of the first and last 25 days are different, this means that AAPL's simple returns differ from the first to last 25 days
+
+#ADP
+ADP_return = dailyReturn(ADP)
+first_25_ADP = ADP_return[1:25]
+last_25_ADP = tail(ADP_return,25)
+ADPfirstMean = mean(first_25_ADP)
+ADPfirstSD = sd(first_25_ADP)
+ADPlastMean = mean(last_25_ADP)
+ADPlastSD = sd(last_25_ADP)
+
+if(ADPfirstMean == ADPlastMean & ADPfirstSD == ADPlastSD){
+  print("true")
+}else{
+  print("false")
+}
+
+# since the means and standard deviations of the first and last 25 days are different, this means that ADP's simple returns differ from the first to last 25 days
+```
+

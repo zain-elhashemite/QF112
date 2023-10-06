@@ -1,0 +1,275 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #10.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 4/23/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+
+# Question 1 (taken from Walpole, Myers, Myers, Ye)
+
+An experiment was performed to determine the effect of temperature and the type of oven for the life of a particular component.  They used 4 different types of ovens and three different temperatures and producded the following results. (go ahead and knit the file to see this clearly)
+
+\begin{tabular}{c c c c c}
+Temperature&$O_1$&$O_2$&$O_3$&$O_4$\\
+\hline
+500&227&214&225&260\\
+&221&259&236&229\\
+\hline
+550&187&181&232&246\\
+&208&179&198&273\\
+\hline
+600&174&198&178&206\\
+&202&194&213&219
+\end{tabular}
+
+## write code to answer the following:
+
+## a)
+
+What is the value of the total sum of squares (SST)?
+
+```{r}
+
+oven1 = c(227,221,187,208,174,202)
+oven2 =  c(214,259,181,179,198,194)
+oven3 = c(225,236,232,198,178,213)
+oven4 = c(260,229,246,273,206,219)
+
+ovens = c(oven1,oven2,oven3,oven4)
+
+temps = c(500,500,500,500,500,500,500,500,550,550,550,550,550,550,550,550,600,600,600,600,600,600,600,600)
+col = c(1,1,2,2,3,3,4,4,1,1,2,2,3,3,4,4,1,1,2,2,3,3,4,4)
+
+data_o=  c(227,221,187,208,174,202,214,259,181,179,198,194,225,236,232,198,178,213,260,229,246,273,206,219)
+
+oven_data = data.frame(ovens, temps, col)
+
+n = 24
+g_mean = mean(oven_data$ovens)
+
+sst = sum((oven_data$ovens - g_mean)^2)
+sst
+#sst = 17116.96
+
+```
+
+
+## b)
+
+What is the value of the error sum of squares (SSE)?
+
+```{r}
+
+temp_means = c('500' = mean(oven_data[oven_data$temps==500,]$ovens), '550' = mean(oven_data[oven_data$temps==550,]$ovens), '600' = mean(oven_data[oven_data$temps==600,]$ovens))
+temp_means
+
+ovens_means = c('1' = mean(oven_data[oven_data$col==1,]$ovens), '2' = mean(oven_data[oven_data$col==2,]$ovens), '3' = mean(oven_data[oven_data$col==3,]$ovens), '4' = mean(oven_data[oven_data$col==4,]$ovens))
+
+ovens_means
+
+# Adds means to df
+oven_data['temp_mean']= NA
+oven_data['temp_mean'][oven_data['temps']==500]= temp_means[1]
+oven_data['temp_mean'][oven_data['temps']==550]= temp_means[2]
+oven_data['temp_mean'][oven_data['temps']==600]= temp_means[3]
+
+oven_data['ovens_mean']= NA
+oven_data['ovens_mean'][oven_data['col']==1]= ovens_means[1]
+oven_data['ovens_mean'][oven_data['col']==2]= ovens_means[2]
+oven_data['ovens_mean'][oven_data['col']==3]= ovens_means[3]
+oven_data['ovens_mean'][oven_data['col']==4]= ovens_means[4]
+
+temp2 = c(500,550,600)
+col2 = c(1,2,3,4)
+
+
+sse = sum((oven_data$ovens-oven_data$int_mean)^2)
+sse
+#sse = 3833.5
+```
+
+## c) 
+
+What is the value of the treatment sum of squares (SSA)?
+```{r}
+
+ssa = sum((oven_data$temp_mean - g_mean)^2)
+ssa
+#ssa = 2191.083
+```
+
+
+## d)
+
+What is the value of the block sum of squares (SSB)?
+
+```{r}
+ssb = sum((oven_data$ovens_mean - g_mean)^2)
+ssb
+#ssb = 2379.458
+
+```
+
+## e)
+
+What is the value of the interaction sum of squares (SSAB)?
+
+```{r}
+
+oven_data['int_mean']= NA
+for (j in 1:4){
+for (i in 1:3){
+    oven_data[oven_data['temps']==temp2[i] & oven_data['col']== col2[j],] $int_mean = mean(subset(oven_data$ovens, oven_data$temps==temp2[i] & oven_data$col==col2[j]))
+    }
+}
+
+ssab = sum((oven_data$int_mean - oven_data$temp_mean - oven_data$ovens_mean + g_mean)^2)
+ssab
+#ssab = 8712.917
+```
+
+## f)
+
+Confirm that SST = SSA + SSB + SSAB + SSE
+```{r}
+
+sst == ssa + ssb + ssab + sse
+
+#TRUE
+```
+
+## Using a .05 level of significance, test the hypothesis (do this without the anova or aov commands)
+
+## g)
+
+that different temperatures have no effect
+
+```{r}
+
+
+f = (ssa/2)/(sse/12)
+pval = 1-pf(f, 2, 12)
+pval
+
+#it is not significant since the pval = 0.06637594, which is greater than 0.05
+```
+
+## h)
+
+that different ovens have not effect
+
+```{r}
+
+f = (ssb/2)/(sse/12)
+pval = 1-pf(f, 2, 12)
+pval
+
+#it is not significant since the pval = 0.05518006, which is greater than 0.05
+
+
+```
+
+## i)
+
+that the type of oven and temperature do not interact.
+
+```{r}
+
+f = (ssab/2)/(sse/12)
+pval = 1-pf(f, 2, 12)
+pval
+
+#it is significant since the pval = 0.0008136817, which is less than 0.05
+
+
+```
+
+## j)
+
+Run this through either the anova or aov command to check your results.
+
+```{r}
+
+oven_data$temps = factor(oven_data$temps)
+oven_data$col = factor(oven_data$col)
+
+anova(lm(oven_data$ovens ~ (temps*col), data=oven_data))
+
+
+
+```
+
+# Question 2
+
+Pick one of your two assets from your csv file that you have been using this semester.  For that asset, pick 4 months (your call) and select 5 log returns from each of those months.  Assuming that these log returns have common variance, do you think that these months have the same mean for the log returns? (You can do this however you like, including using the R functions)
+
+```{r}
+
+library(quantmod)
+
+getSymbols("AAPL", src = "yahoo", from = '2022-12-01', to = '2023-04-01')
+
+log_returns = na.omit(log(AAPL$AAPL.Adjusted/lag(AAPL$AAPL.Adjusted)))
+#log_returns
+
+L1 = sample(log_returns["2022-12"], size=5)
+L2 = sample(log_returns["2023-01"], size=5)
+L3 = sample(log_returns["2023-01"], size=5)
+L4 = sample(log_returns["2023-03"], size=5)
+
+
+mean(L1) #-0.01258563
+mean(L2) #0.0151098
+mean(L3) #0.0008684519
+mean(L4) #0.0003326389
+
+#after calculating the means of the log returns for each month, 
+#we can see that they differ on this sample of 5. we can create
+#a more accurate test by calculating the mean of all the log returns 
+#for each month and comparing those rather than a random sample of 5
+
+
+
+```
+
+
+

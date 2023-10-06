@@ -1,0 +1,251 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #3.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 2/9/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+# Question 1 (adapted from Stinerock: Statistics with R)
+
+In 2013, the average level of debt from graduating students was 27,000 dollars.  We will assume this as the population mean with a standard deviation of 4500.  If we take a sample of 121 graduates, answer the following questions.
+
+## a)
+
+What is the probability that $\bar{x}$ will fall within 500 dollars of the population mean?
+```{r}
+#pop mean = 27000
+#pop sd = 4500
+#sample = 121
+
+se = 4500/(sqrt(121))
+
+left.a = (27000-27000-500)/se
+right.a = (27000-27000+500)/se
+left1.a = pnorm(left.a)
+right1.a = pnorm(right.a)
+
+prob.a = right1.a-left1.a
+prob.a #0.7783764 or 77.83%
+
+
+
+```
+
+## b)
+
+What is the probability that $\bar{x}$ will fall within 250 dollars of the population mean?
+```{r}
+#pop mean = 27000
+#pop sd = 4500
+#sample = 121
+
+se = 4500/(sqrt(121))
+
+left.b = (27000-27000-250)/se
+right.b = (27000-27000+250)/se
+
+left1.b = pnorm(left.b)
+right1.b = pnorm(right.b)
+
+prob.b = right1.b-left1.b
+prob.b #0.458874 or 45.88%
+
+
+
+```
+
+# Question 2 (adapted from Stinerock: Statistics with R)
+
+If we assume that the percentage of people in the world who are left handed is 12\%, answer the following
+
+## a) 
+ If a sample of $n=400$ people is chosen at random, what is the probability that $\bar{p}$ is within .02 of $p$?
+ 
+```{r}
+#prob(0.10 < p < 0.14)
+
+(pnorm(0.14,0.12,sqrt((0.12*.88)/400))) - (pnorm(0.10,0.12,sqrt((0.12*.88)/400)))
+
+```
+ 
+## b)
+
+Answer the same question as in part a) but this time, assume that $n=800$.
+
+```{r}
+#prob(0.10 < p < 0.14)
+
+(pnorm(0.14,0.12,sqrt((0.12*.88)/800))) - (pnorm(0.10,0.12,sqrt((0.12*.88)/800)))
+
+```
+
+# Question 3
+
+Load in the data set that you created for homework 2 (consisting of the adjusted close prices for one year for two assets, which we'll arbitrarily label asset A and asset B).  we will be treating these data sets as the true population, so this is a finite population.  As a result, you will be sampling without replacement for this problem.  Answer the following:
+
+```{r}
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+
+```
+
+
+## a)
+
+Assuming that your data set is the true population, for asset A, determine the two population parameters, $\mu_A$ and $\sigma_A$.
+```{r}
+
+mu_A = mean(AAPL$AAPL.Adjusted)
+sigma_A = ((sqrt(length(AAPL$AAPL.Adjusted)-1))/sqrt(length(AAPL$AAPL.Adjusted))*sd(AAPL$AAPL.Adjusted))
+
+
+mu_A
+sigma_A
+```
+
+## b)
+
+If you were to take a sample of $n=40$ values from this data set, what is the probability that $\bar{x_A}$ would be within 1 dollar of the population mean?
+
+```{r}
+
+pnorm(155.1466, 154.1466, (12.82598/sqrt(40))) - pnorm(153.1466, 154.1466,(12.82598/sqrt(40)))
+
+```
+
+
+## c)
+
+Generate 1000 samples of size $n=40$ from your data.  What percentage of these sample means are within 1 dollar of the population mean?  Does your answer agree with what you determined in part b)?  Why or why not?
+
+```{r}
+
+samples=replicate(1000,sample(AAPL$AAPL.Adjusted,40))
+muS = colMeans((samples))
+(length(which(muS>mu_A-1 & muS<mu_A+1))/length(muS)) *100
+
+#Yes this answer agrees with what was determined in part B as the values are fairly close to each other. However if another test was run with a larger sample set then we could get closer to the value determined in part B.
+
+
+
+```
+
+## d)
+
+Do part c) again, but this time use 10000 samples.
+
+```{r}
+samplesD=replicate(10000,sample(AAPL$AAPL.Adjusted,40))
+muS1 = colMeans((samplesD))
+(length(which(muS1>mu_A-1 & muS1<mu_A+1))/length(muS1)) 
+
+
+```
+
+
+## e)
+
+Using asset B, modify your data to determine when the stock increases in value.  To do this, use the sign and diff functions, which will result in a vector of $N-1$ values  These will be -1 for a decrease, 0 for the stock staying the same, and 1 for an increase.  Treat this new vector as your new population.  Let $p_B$ be the percentage of days in which the stock increases in value.
+
+```{r}
+
+rtn = diff(log(AAPL$AAPL.Adjusted))[-1]
+
+
+pos = length(rtn[rtn>0])
+
+(pos/length(AAPL$AAPL.Adjusted))
+
+
+
+```
+
+## f)
+If you were to take a sample of $n=50$ values from this data set, what is the probability that $\bar{p_B}$ would be within 2 percent of the population proportion?
+
+```{r}
+
+n=50
+pnorm(.486, .466, (sqrt((.466)*(1-.466)))/sqrt(n)) - pnorm(.446, .466, (sqrt((.466)*(1-.466)))/sqrt(n))
+
+
+
+0
+```
+
+## g)
+Generate 1000 samples of size $n=50$ from your data.  What percentage of these sample proportions are within 2 percent of the population percentage?  Does your answer agree with what you determined in part f)?  Why or why not?
+```{r}
+
+mydata = data.frame(ADP)
+sam = replicate(1000,sample(mydata$ADP.Adjusted,50))
+sign = sign(diff(sam,log=1, differences =1))
+sign[sign==-1] = 
+sum_ = (colSums(sign))
+length(subset(sum_,(24.3)>sum_ & sum_>(20.3)))/1000
+
+# No it does not agree with what was determined in part f, this is because the value is nearly double that in f.
+
+
+```
+
+## h)
+Do part g) again, but this time use 10000 samples.
+```{r}
+mydata = data.frame(ADP)
+sam0 = replicate(10000,sample(mydata$ADP.Adjusted,50))
+sign0 = sign(diff(sam0,log=1, differences =1))
+sign0[sign0==-1] = 0
+sum_0 = (colSums(sign0))
+length(subset(sum_0,(24.3)>sum_0 & sum_0>(20.3)))/10000
+
+
+```
+
+
+

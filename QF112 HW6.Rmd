@@ -1,0 +1,238 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #6.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 3/25/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+# my response
+```
+
+# Question 1 
+
+For this problem, you will be using your previous data set of the two assets that you downloaded.
+
+```{r}
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+```
+
+## a)
+
+Do these assets have a net day to day increase the majority of the time?  Choose your own significance level that you feel will be relevant for this question.
+
+```{r}
+#probability that Apple will increase
+change = diff(AAPL$AAPL.Adjusted)
+sign = sign(change)
+pAAPL = (sum(sign$AAPL.Adjusted[-1]>0))/length(sign$AAPL.Adjusted)
+pAAPL
+  
+#probability that ADP will increase
+change = diff(ADP$ADP.Adjusted)
+sign = sign(change)
+pADP = (sum(sign$ADP.Adjusted[-1]>0))/length(sign$ADP.Adjusted)
+pADP
+  
+#find rejection regions, 5% siginificance level
+
+rejectAAPL = .5+qnorm(1-.05)*sqrt((.5*(1-.5)/length(sign$AAPL.Adjusted)))
+rejectAAPL
+
+rejectADP = .5+qnorm(1-.05)*sqrt((.5*(1-.5)/length(sign$ADP.Adjusted)))
+rejectADP
+
+#We can reject AAPL's statistic as it lies outside of the region of rejection, 
+#however we fail to reject ADP's statistic as it lies within its region of rejection
+```
+
+## b)
+
+Is the standard deviation of the simple returns for each asset greater than .015?  Again choose a level of significance that you feel is relevant.
+
+```{r}
+
+sd_AAPL = sd(dailyReturn(AAPL$AAPL.Adjusted))
+sd_ADP = sd(dailyReturn(ADP$ADP.Adjusted))
+
+# set the significance level
+alpha = 0.05
+
+# test if the standard deviation of AAPL's daily returns is greater than 0.015
+testAAPL = t.test(dailyReturn(AAPL$AAPL.Adjusted), alternative = "greater", mu = 0.015)
+
+(testAAPL$p.value > alpha)
+
+# test if the standard deviation of ADP's daily returns is greater than 0.015
+testADP = t.test(dailyReturn(ADP$ADP.Adjusted), alternative = "greater", mu = 0.015)
+
+(testADP$p.value > alpha)
+
+#The standard deviation of AAPL's daily returns is not greater than 0.015 
+#with a significance level of 0.05 
+
+#The standard deviation of ADP's daily returns is not greater than 0.015 
+#with a significance level of 0.05 
+
+```
+
+# Question 2 (Adapted from Stinerock)
+
+Doctors in Tampa reportedly earn an average salary of 141,300 dollars.  We conduct a survey of doctors in New Orleans with a sample of size $n=64$ to test whether their mean salary is different from that in Tampa and get the result that our sample mean is 138,000 dollars.
+
+## a)
+
+If we assume that $\sigma=18,000$, at the level of $\alpha=.01$ use the six-step framework to test whether the true mean in New Orleans is different from that of Tampa.
+
+```{r}
+mu = 141300
+n = 64
+xbar = 138000
+sigma = 18000
+alpha = 0.01
+
+#confidence intervals
+upper = xbar+qnorm(1-alpha/2)*(sigma/sqrt(n))
+upper
+
+lower = xbar-qnorm(1-alpha/2)*(sigma/sqrt(n))
+lower
+
+CI = c(lower,upper)
+CI
+
+z = (xbar - mu)/(sigma/(sqrt(n)))
+z
+
+p = 2*(1-pnorm(abs(z)))
+p
+
+#since p is greater than alpha (0.1424668 > 0.01), we fail to 
+#reject the null hypothesis
+
+```
+
+## b)
+
+What is the $p$-value?
+
+```{r}
+z = (xbar-mu)/(sigma/(sqrt(n)))
+z
+
+p= 2*(1-pnorm(abs(z)))
+p
+
+#p value: 0.1424668
+
+```
+
+## c)
+
+If we assume that $\sigma=18,000$, at the level of $\alpha=.01$ use the six-step framework to test whether the true mean in New Orleans is less than that of Tampa.
+
+```{r}
+
+#null hypothesis: the true mean salary of doctors in new orleans is the same 
+#as tampa, mu = $141,300
+
+#alternate hypothesis: the true mean salary of doctors in new orleans is less 
+#than tampa, mu < $141,300
+
+#same variables as used in above questions, except this is a one-tailed
+
+z = (xbar-mu)/(sigma/sqrt(n))
+z
+
+p = pnorm(z)
+p
+
+#p value: 0.07123338
+#fail to reject the null hypothesis as p is still greater than alpha 
+#(0.07123338 > 0.01)
+
+```
+
+## d)
+
+If the true mean in New Orleans is actually 139,000 dollars, what is the $\beta$ of this test?
+
+```{r}
+truemean = 139000
+
+b= 1-pnorm(-qnorm(1-alpha)+(mu-truemean)/(sigma/sqrt(n)))
+b
+
+#beta = 0.9039046
+
+```
+
+# Question 3 (Adapted from Probability and Statistics for Engineers and Scientest by Walpole Myers Myers and Ye)
+
+Based on past experiences, a professor believes that the time that it takes students to complete a test is a random variable with mean 35 minutes.  If a random sample of 20 students is taken that has a sample average time of 33.1 minutes with standard deviation 4.3, at the .05 significance level, should the professor determine that the true mean is actually less than the 35?
+
+```{r}
+
+mu = 35
+n = 20
+xbar = 33.1
+sampsd = 4.3
+alpha = 0.05
+
+#null hypothesis: mu = 35
+#alternate hypothesis: mu < 35
+
+z = z = (xbar-mu)/(sampsd/sqrt(n))
+z
+
+p = pnorm(z)
+p
+
+#p value = 0.02407399
+
+#since p is less than alpha (0.02407399 < 0.05), we can reject the null hypothesis
+```
+
+

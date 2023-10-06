@@ -1,0 +1,309 @@
+---
+output: pdf_document
+
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+
+# QF112.  Homework #5.
+
+
+## `r format(Sys.time(), "%Y-%m-%d")`
+
+I pledge my honor that I have abided by the Stevens Honor System.
+
+By filling out the following fields, you are signing this pledge.  No assignment will get credit without being pledged.
+
+Name: Zain ElHashemite
+
+CWID: 20010286
+
+Date: 2/17/2023
+
+
+
+
+```{r}
+CWID = 20010286 #Place here your Campus wide ID number, this will personalize
+#your results, but still maintain the reproduceable nature of using seeds.
+#If you ever need to reset the seed in this assignment, use this as your seed
+#Papers that use -1 as this CWID variable will earn 0's so make sure you change
+#this value before you submit your work.
+personal = CWID %% 10000
+set.seed(personal)
+```
+
+It will be up to you to determine where you should use R code in this document.  You can easily add a new section of code by simply using copy/paste or typing it in yourself.  For your convenience, a blank section of code is provided below.
+
+```{r}
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+
+write.csv(as.data.frame(AAPL), "AAPL.csv")
+write.csv(as.data.frame(ADP), "ADP.csv")
+
+frame1 = data.frame(AAPL)
+frame2 = data.frame(ADP)
+```
+
+# Question 1 
+
+For this problem, you will be using your previous data set of the two assets that you downloaded.
+
+## a)
+
+For the first asset, determine the 60%, 90%, and 95% confidence intervals for the population mean of the adjusted close prices.
+
+```{r}
+
+xbar = mean(AAPL$AAPL.Adjusted)
+sd = sd(AAPL$AAPL.Adjusted)
+
+a = .4
+a1 = .1
+a2 = .05
+
+n = length(AAPL$AAPL.Adjusted)
+
+conf60 = qnorm(1-(a/2)) * (sd/(sqrt(n)))
+bound = c(xbar - conf60, xbar+conf60)
+bound
+
+#[153.4652, 154.8279]
+
+conf90 = qnorm(1-(a1/2)) * (sd/(sqrt(n)))
+bound1 = c(xbar - conf90, xbar+conf90)
+bound1
+
+#[152.8149, 155.4782]
+
+conf95 = qnorm(1-(a2/2)) * (sd/(sqrt(n)))
+bound2 = c(xbar - conf95, xbar+conf95)
+bound2
+
+#[152.5598, 155.7333]
+
+
+
+
+```
+
+## b)
+
+
+For the first asset, restrict your data set to just the most recent two weeks.  Use only this data to determine the 60%, 90%, and 95% confidence intervals for the population mean of the adjusted close prices.
+
+```{r}
+library(quantmod)
+getSymbols("AAPL", src = "yahoo", from = "2022-02-08", to = "2023-02-22")
+
+write.csv(as.data.frame(AAPL), "AAPL2.csv")
+
+frame1 = data.frame(AAPL)
+
+
+
+xbar = mean(AAPL$AAPL.Adjusted)
+sd = sd(AAPL$AAPL.Adjusted)
+
+a = .4
+a1 = .1
+a2 = .05
+
+n = length(AAPL$AAPL.Adjusted)
+
+conf60 = qt(1-(a/2), n - 1) * (sd/(sqrt(n)))
+bound = c(xbar - conf60, xbar+conf60)
+bound
+#[150.4840, 151.7827]
+
+
+conf90 = qt(1-(a1/2), n - 1) * (sd/(sqrt(n)))
+bound1 = c(xbar - conf90, xbar+conf90)
+bound1
+#[149.8617, 152.4049]
+
+conf95 = qt(1-(a2/2), n - 1) * (sd/(sqrt(n)))
+bound2 = c(xbar - conf95, xbar+conf95)
+bound2
+#[149.6165, 152.6502]
+
+
+
+```
+
+## c)
+
+For the second asset, determine the 60%, 90%, and 95% confidence intervals for the population variance.
+
+```{r}
+library(quantmod)
+getSymbols("ADP", src = "yahoo", from = "2022-01-01", to = "2023-01-01")
+write.csv(as.data.frame(ADP), "ADP.csv")
+frame2 = data.frame(ADP)
+
+n = length(ADP$ADP.Adjusted)
+xbar = mean(ADP$ADP.Adjusted)
+
+sd = sd(ADP$ADP.Adjusted)
+
+a = .4
+a1 = .1
+a2 = .05
+
+conf60 = qnorm(1-(a/2)) * (sd/sqrt(n))
+bound = c(xbar - conf60, xbar+conf60)
+bound
+#[225.4994, 227.4794]
+
+conf90 = qnorm(1-(a1/2)) * (sd/sqrt(n))
+bound1 = c(xbar - conf90, xbar+conf90)
+bound1
+#[224.5545, 228.4242]
+
+conf95 = qnorm(1-(a2/2)) * (sd/sqrt(n))
+bound2 = c(xbar - conf95, xbar+conf95)
+bound2
+#[224.1838, 228.7949]
+
+```
+
+## d)
+
+After converting your second asset to the log returns (if you had this wrong on a previous homework, please reach out to see how to fix it), determine the confidence intervals of the population variance of these log-returns at the 60%, 90%, and 95% levels.
+
+```{r}
+ADPL = as.vector(diff(log(ADP$ADP.Adjusted))[-1])
+
+xbar = mean(ADPL)
+xbar
+
+n = length(ADPL)
+
+sd = sd(ADPL)
+
+a = 0.4
+a1=0.1
+a2=0.05
+
+conf60 = qnorm(1-(a/2)) * (sd/sqrt(n))
+bound = c(xbar - conf60, xbar+conf60)
+bound
+#[-0.0009624720,  0.0009426681]
+
+conf90 = qnorm(1-(a1/2)) * (sd/sqrt(n))
+bound1 = c(xbar - conf90, xbar+conf90)
+bound1
+#[-0.001871592,  0.001851789]
+
+conf95 = qnorm(1-(a2/2)) * (sd/sqrt(n))
+bound2 = c(xbar - conf95, xbar+conf95)
+bound2
+#[-0.002228243,  0.002208439]
+```
+
+# Question 2 (Adapted from Stinerock)
+
+A study of 450 families found that 212 out of the had to cut back recently on the purchase of big-ticket items over the past 6 months.
+
+## a)
+
+What is the 90% confidence interval estimate of the population proportion $p$ of the households that are cutting back?
+
+```{r}
+
+n = 450
+p_hat = 212/n
+p_hat
+
+sqrt_p = 1.645*sqrt((p_hat*(1-p_hat))/n)
+sqrt_p
+
+p_hat + sqrt_p
+p_hat - sqrt_p 
+#[0.4324029, 0.5098194]
+
+```
+
+## b)
+
+What sample size would you recommend to achieve a margin of error of .03?
+
+```{r}
+
+p_hat = 212/450
+moe = 0.03
+n = ((1.645)^2) * (p_hat*(1-p_hat))/((moe)^2)
+n
+
+#to achieve a margin of error of 0.03 a sample size of 749 should be used.
+
+
+```
+
+## c)
+
+How large a sample size would be required to achieve a 99% confidence interval estimate of $p$ with a margin of error of .03?
+```{r}
+
+p_hat = 212/450
+
+moe = 0.03
+n = ((2.575)^2) * (p_hat*(1-p_hat))/((moe)^2)
+n
+
+#to achieve a 99% confidence interval estimate with a margin of error of 0.03 a sample size of 1836 should be used.
+
+```
+
+## d)
+
+How large a sample size would be required to achieve a 99% confidence interval estimate of $p$ with a margin of error of .025?
+
+```{r}
+
+p_hat = 212/450
+
+moe = 0.025
+
+n = ((2.575)^2) * (p_hat*(1-p_hat)) / ((moe)^2)
+n
+
+#to achieve a 99% confidence interval estimate with a margin of error of 0.025 a sample size of 2643 should be used.
+
+```
+
+# Question 3 (Taken from Mathematical Statistics and Data Analysis by John Rice)
+
+Answer whether the following are true or false and why.  Note that the why part is also very important
+
+# a)
+
+The center of a 95% confidence interval for the population mean is a random variable
+
+  - True, the sample mean is a random variable because the sample mean will vary for the samples across a population. 
+
+# b) 
+
+A 95% confidence interval for $\mu$ contains the sample mean with probability .95
+
+  - False, the sample mean will always be contained within a confidence interval for the population.
+
+# c)
+
+A 95% confidence interval contains 95% of the population
+  
+  - False, a 95% confidence interval does not contain 95% of the population. It is a set of values which can be 95% certain to contain the population mean.
+
+# d)
+
+Out of one hunderd 95% confidence intervals for $\mu$, 95 will contain $\mu$.
+
+  - False, a 95% confidence interval is a 95% chance that the population mean will be contained within the set of values, it does not mean that out of 100 95% confidence intervals, 95/100 of them will contain mu.
+
+
